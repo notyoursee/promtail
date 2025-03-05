@@ -1,0 +1,59 @@
+version: '3'
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
+    # Add Loki scraping config in Prometheus
+    extra_hosts:
+      - "loki:127.0.0.1"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=kontolj4r4n
+    networks:
+      - monitoring
+    depends_on:
+      - loki
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    ports:
+      - 3100:3100
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml
+    networks:
+      - monitoring
+    restart: always
+ 
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket to access containers
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - ./promtail.yml:/etc/promtail/config.yml  # Promtail config
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+    restart: always
+
+
+
+
+networks:
+  monitoring:
+    external: true
+
