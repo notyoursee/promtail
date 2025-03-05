@@ -19,7 +19,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=kontolj4r4n
+      - GF_SECURITY_ADMIN_PASSWORD=RAHASIA
     networks:
       - monitoring
     depends_on:
